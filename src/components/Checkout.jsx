@@ -16,7 +16,7 @@ const requestConfig = {
 };
 
 export default function Checkout() {
-  const { items } = useContext(CartContext);
+  const { items, finishOrder } = useContext(CartContext);
   const { hideModal, progress } = useContext(UserProgressContext);
 
   const {
@@ -24,11 +24,19 @@ export default function Checkout() {
     isLoading: isSending,
     error,
     sendRequest,
+    clearData,
+    setError,
   } = useHttp("http://localhost:3000/orders", requestConfig);
 
   const totalAmountToPay = items.reduce((acc, item) => {
     return acc + item.price * item.quantity;
   }, 0);
+
+  function handleFinish() {
+    hideModal();
+    finishOrder();
+    clearData();
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -44,6 +52,8 @@ export default function Checkout() {
         },
       })
     );
+
+    setError();
   }
 
   let actions = (
@@ -69,7 +79,7 @@ export default function Checkout() {
           minutes.
         </p>
         <p className="modal-action">
-          <Button onClick={hideModal}>Okay</Button>
+          <Button onClick={handleFinish}>Okay</Button>
         </p>
       </Modal>
     );
