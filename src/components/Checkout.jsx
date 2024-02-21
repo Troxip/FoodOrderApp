@@ -40,6 +40,7 @@ export default function Checkout() {
 
   function handleSubmit(e) {
     e.preventDefault();
+    setError();
 
     const fd = new FormData(e.target);
     const customerData = Object.fromEntries(fd.entries());
@@ -52,8 +53,6 @@ export default function Checkout() {
         },
       })
     );
-
-    setError();
   }
 
   let actions = (
