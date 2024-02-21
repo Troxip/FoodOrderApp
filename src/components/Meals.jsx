@@ -9,7 +9,6 @@ export default function Meals() {
     async function fetchMeals() {
       const response = await fetch("http://localhost:3000/meals");
       const meals = await response.json();
-      console.log(meals);
 
       if (!response.ok) {
         console.log("bad");
