@@ -14,9 +14,14 @@ export default function Checkout() {
     return acc + item.price * item.quantity;
   }, 0);
 
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log("hello");
+  }
+
   return (
     <Modal open={progress === "checkout"} onClose={hideModal}>
-      <form>
+      <form onSubmit={handleSubmit}>
         <h2>Checkout</h2>
         <p>Total Amount: {currencyFormatter.format(totalAmountToPay)}</p>
         <Input label="Full Name" type="text" id="full-name" />
@@ -26,7 +31,8 @@ export default function Checkout() {
           <Input label="Postal Code" type="text" id="postal-code" />
           <Input label="City" type="text" id="city" />
         </div>
-        <p className="model-actions">
+
+        <p className="modal-actions">
           <Button type="button" textOnly onClick={hideModal}>
             Close
           </Button>
