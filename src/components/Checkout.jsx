@@ -5,10 +5,26 @@ import CartContext from "../store/CartContext";
 import { currencyFormatter } from "./../util/formatting";
 import Input from "./UI/input";
 import Button from "./UI/Button";
+import useHttp from "../hooks/useHttp";
+import Error from "./Error";
+
+const requestConfig = {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+};
 
 export default function Checkout() {
   const { items } = useContext(CartContext);
   const { hideModal, progress } = useContext(UserProgressContext);
+
+  const {
+    data,
+    isLoading: isSending,
+    error,
+    sendRequest,
+  } = useHttp("http://localhost:3000/orders", requestConfig);
 
   const totalAmountToPay = items.reduce((acc, item) => {
     return acc + item.price * item.quantity;
@@ -20,18 +36,43 @@ export default function Checkout() {
     const fd = new FormData(e.target);
     const customerData = Object.fromEntries(fd.entries());
 
-    fetch("http://localhost:3000/orders", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    sendRequest(
+      JSON.stringify({
         order: {
           items,
           customer: customerData,
         },
-      }),
-    });
+      })
+    );
+  }
+
+  let actions = (
+    <>
+      <Button type="button" textOnly onClick={hideModal}>
+        Close
+      </Button>
+      <Button>Submit Order</Button>
+    </>
+  );
+
+  if (isSending) {
+    actions = <span>Sending order data...</span>;
+  }
+
+  if (data && !error) {
+    return (
+      <Modal open={progress === "checkout"} onClose={hideModal}>
+        <h2>Success!</h2>
+        <p>Your order was submitted successfully</p>
+        <p>
+          We will get back to you with more details via email with the next few
+          minutes.
+        </p>
+        <p className="modal-action">
+          <Button onClick={hideModal}>Okay</Button>
+        </p>
+      </Modal>
+    );
   }
 
   return (
@@ -47,12 +88,11 @@ export default function Checkout() {
           <Input label="City" type="text" id="city" />
         </div>
 
-        <p className="modal-actions">
-          <Button type="button" textOnly onClick={hideModal}>
-            Close
-          </Button>
-          <Button>Submit Order</Button>
-        </p>
+        {error && (
+          <Error title="Failed to submit order" message={error}></Error>
+        )}
+
+        <p className="modal-actions">{actions}</p>
       </form>
     </Modal>
   );
